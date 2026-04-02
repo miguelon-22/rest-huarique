@@ -2,14 +2,8 @@
 require_once '../../config/db.php';
 include '../../includes/admin/header.php';
 
-if (!isset($_SESSION['admin_logged_in'])) {
-    header("Location: login.php");
-    exit;
-}
-
-if ($_SESSION['admin_role'] !== 'admin') {
-    die("<div style='background: #020202; color: #ff4757; padding: 50px; font-family: monospace; font-size: 1.2rem; text-align: center;'>ACCESO DENEGADO. Nivel de autorización insuficiente.</div>");
-}
+// Protegido por middleware: solo admin puede acceder
+if (!has_role('admin')) { auth_required('admin'); }
 
 $msg = '';
 

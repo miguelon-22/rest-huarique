@@ -1,5 +1,3 @@
 <?php
-session_start();
-session_destroy();
-header("Location: login.php");
-exit();
+require_once '../../config/middleware.php';
+auth_logout('login.php');

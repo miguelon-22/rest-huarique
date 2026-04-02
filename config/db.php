@@ -1,6 +1,7 @@
 <?php
 // Core System Configuration & .env Loader
 require_once __DIR__ . '/env_loader.php';
+require_once __DIR__ . '/middleware.php';
 EnvLoader::load(__DIR__ . '/../.env');
 
 // Database Settings from .env
@@ -45,6 +46,12 @@ try {
         $pdo->exec("ALTER TABLE public.clientes ADD COLUMN dni varchar");
     }
 
+    // Auto-migrate: correo field in clientes
+    $check_correo_cli = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name='clientes' AND column_name='correo'")->fetch();
+    if (!$check_correo_cli) {
+        $pdo->exec("ALTER TABLE public.clientes ADD COLUMN correo varchar");
+    }
+
     $check_estado = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name='reservas_mesa' AND column_name='estado_pago'")->fetch();
     if (!$check_estado) {
         $pdo->exec("ALTER TABLE public.reservas_mesa ADD COLUMN estado_pago varchar DEFAULT 'pendiente'");
@@ -71,6 +78,12 @@ try {
     $check_star = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name='testimonios' AND column_name='calificacion'")->fetch();
     if (!$check_star) {
         $pdo->exec("ALTER TABLE public.testimonios ADD COLUMN calificacion int DEFAULT 5");
+    }
+
+    // Auto-migrate: correo field in testimonios
+    $check_correo_test = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name='testimonios' AND column_name='correo'")->fetch();
+    if (!$check_correo_test) {
+        $pdo->exec("ALTER TABLE public.testimonios ADD COLUMN correo varchar");
     }
 
 } catch (PDOException $e) {
