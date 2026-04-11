@@ -55,8 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
-                'success_url' => BASE_URL . 'pago_exitoso.php?external_reference=' . $numero_reserva,
-                'cancel_url' => BASE_URL . 'index.php?reserva=error',
+                'success_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/pago_exitoso.php?external_reference=' . $numero_reserva,
+                'cancel_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/index.php?reserva=error',
             ]));
             
             $res = curl_exec($ch);

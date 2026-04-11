@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/../config/db.php';
 http_response_code(404);
 ?>
 <!DOCTYPE html>
@@ -9,7 +8,7 @@ http_response_code(404);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 - SECTOR NO ENCONTRADO</title>
     <!-- CSS -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -110,7 +109,7 @@ http_response_code(404);
         > SUGGESTION: Retornar a una coordenada segura.
     </p>
     
-    <a href="<?= BASE_URL ?>index.php" class="cyber-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 15px 40px; font-size: 0.85rem; letter-spacing: 3px; background: var(--primary); color: white; text-decoration: none; font-weight: 800; border: none; cursor: pointer; border-radius: 4px; box-shadow: 0 0 20px rgba(255, 71, 87, 0.3); transition: 0.3s;">
+    <a href="/index.php" class="cyber-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 15px 40px; font-size: 0.85rem; letter-spacing: 3px; background: var(--primary); color: white; text-decoration: none; font-weight: 800; border: none; cursor: pointer; border-radius: 4px; box-shadow: 0 0 20px rgba(255, 71, 87, 0.3); transition: 0.3s;">
         <i data-lucide="corner-down-left"></i>
         VOLVER AL SISTEMA
     </a>

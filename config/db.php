@@ -1,12 +1,5 @@
+<?php
 // Core System Configuration & .env Loader
-$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
-$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$current_script = $_SERVER['SCRIPT_NAME'] ?? '/';
-$base_dir = dirname($current_script);
-// Ensure base_dir ends with a slash and doesn't double slash
-$base_dir = rtrim($base_dir, '/\\') . '/';
-define('BASE_URL', $protocol . '://' . $host . $base_dir);
-
 require_once __DIR__ . '/env_loader.php';
 require_once __DIR__ . '/middleware.php';
 EnvLoader::load(__DIR__ . '/../.env');
