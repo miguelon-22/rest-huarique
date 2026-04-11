@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $telefono = $_POST['telefono'] ?? '';
     $fecha = $_POST['fecha'] ?? '';
     $hora = $_POST['hora'] ?? '';
-    $cantidad_personas = $_POST['cantidad_personas'] ?? 2;
+    $cantidad_personas = $_POST['personas'] ?? 2;
     $informacion_adicional = $_POST['informacion_adicional'] ?? '';
 
     if (empty($nombre) || empty($dni) || empty($email) || empty($fecha) || empty($hora)) {
@@ -60,17 +60,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]));
             
             $res = curl_exec($ch);
+            $curl_err = curl_error($ch);
             $response = json_decode($res, true);
             
             if (isset($response['url'])) {
                 header("Location: " . $response['url']);
                 exit;
             } else {
-                error_log("Stripe Error (Reservation): " . ($response['error']['message'] ?? 'Unknown'));
-                die("Error de Pago: No se pudo conectar con la pasarela real.");
+                $msg = $response['error']['message'] ?? ($curl_err ?: 'Error desconocido al conectar con Stripe.');
+                error_log("Stripe Error (Reservation): " . $res . " | Curl: " . $curl_err);
+                die("<div style='background:#fde8e8; color:#9b1c1c; padding:20px; border-radius:8px; font-family:sans-serif;'>
+                        <h3>Error en Pago de Reserva (Stripe)</h3>
+                        <p>$msg</p>
+                        <a href='index.php#reservas'>Intentar de Nuevo</a>
+                    </div>");
             }
         } else {
-            header("Location: index.php?reserva=error");
+            header("Location: index.php?reserva=error&msg=no_insert");
         }
     } catch (Exception $e) {
         error_log($e->getMessage());

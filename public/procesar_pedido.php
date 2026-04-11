@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stripe_key = $_ENV['STRIPE_SECRET_KEY'] ?? getenv('STRIPE_SECRET_KEY');
             $ch = curl_init('https://api.stripe.com/v1/checkout/sessions');
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Required for local dev/laragon
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_USERPWD, $stripe_key . ':');
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
                 'payment_method_types' => ['card'],
@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'price_data' => [
                         'currency' => 'pen',
                         'product_data' => ['name' => 'Pedido ' . $numero_pedido],
-                        'unit_amount' => intval($total_final * 100),
+                        'unit_amount' => intval(round($total_final * 100)),
                     ],
                     'quantity' => 1,
                 ]],
@@ -106,18 +106,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]));
             
             $res = curl_exec($ch);
+            $curl_error = curl_error($ch);
             $response = json_decode($res, true);
             
             if (isset($response['url'])) { 
                 header("Location: " . $response['url']); 
                 exit(); 
             } else {
-                error_log("Stripe Error: " . ($response['error']['message'] ?? 'Unknown Error'));
-                die("Error de Pasarela (Stripe): " . ($response['error']['message'] ?? 'Respuesta inválida'));
+                $error_msg = $response['error']['message'] ?? ($curl_error ?: 'Unknown Error');
+                error_log("Stripe Error: " . $res . " | Curl: " . $curl_error);
+                die("<div style='background:#fde8e8; color:#9b1c1c; padding:20px; border-radius:8px; font-family:sans-serif;'>
+                        <h3>Error en Pasarela Stripe</h3>
+                        <p>$error_msg</p>
+                        <a href='checkout.php'>Regresar al Carrito</a>
+                    </div>");
             }
         }
 
-        // 7. PAYPAL INTEGRATION (Real OAuth + Order Gateway)
+        // 7. PAYPAL INTEGRATION
         if ($metodo_pago === 'paypal') {
             $client_id = $_ENV['PAYPAL_CLIENT_ID'] ?? getenv('PAYPAL_CLIENT_ID');
             $secret = $_ENV['PAYPAL_SECRET'] ?? getenv('PAYPAL_SECRET');
@@ -138,11 +144,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'Content-Type: application/json',
                     'Authorization: Bearer ' . $token_res['access_token']
                 ]);
+                
+                // PayPal for Sandbox often works better in USD. Convert PEN to USD approximately.
+                $monto_usd = number_format($total_final / 3.75, 2, '.', '');
+                
                 $order_data = json_encode([
                     'intent' => 'CAPTURE',
                     'purchase_units' => [[
                         'reference_id' => $numero_pedido,
-                        'amount' => ['currency_code' => 'USD', 'value' => number_format($total_final / 3.75, 2, '.', '')]
+                        'amount' => ['currency_code' => 'USD', 'value' => $monto_usd]
                     ]],
                     'application_context' => [
                         'return_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/pago_exitoso.php?external_reference=' . $numero_pedido,
@@ -161,13 +171,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                     }
                 } else {
+                    $error_msg = $res_order['message'] ?? 'Error desconocido al crear orden.';
                     error_log("PayPal Order Error: " . $res_order_raw);
-                    die("Error de Pasarela (PayPal Order): " . ($res_order['message'] ?? 'Respuesta inválida'));
+                    die("<div style='background:#fde8e8; color:#9b1c1c; padding:20px; border-radius:8px; font-family:sans-serif;'>
+                            <h3>Error en Pasarela PayPal</h3>
+                            <p>$error_msg</p>
+                            <a href='checkout.php'>Regresar al Carrito</a>
+                        </div>");
                 }
             } else {
                 $err = curl_error($ch);
+                $error_desc = $token_res['error_description'] ?? ($err ?: 'No se pudo conectar con PayPal');
                 error_log("PayPal Token Error: " . $res_token . " | Curl Error: " . $err);
-                die("Error de Pasarela (PayPal Auth): " . ($token_res['error_description'] ?? 'No se pudo autenticar o conectar. ' . $err));
+                die("<div style='background:#fde8e8; color:#9b1c1c; padding:20px; border-radius:8px; font-family:sans-serif;'>
+                        <h3>Error de Autenticación PayPal</h3>
+                        <p>$error_desc</p>
+                        <a href='checkout.php'>Regresar al Carrito</a>
+                    </div>");
             }
         }
 
