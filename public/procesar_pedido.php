@@ -101,8 +101,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
-                'success_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/pago_exitoso.php?external_reference=' . $numero_pedido,
-                'cancel_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/checkout.php?cancel=1',
+                'success_url' => BASE_URL . 'pago_exitoso.php?external_reference=' . $numero_pedido,
+                'cancel_url' => BASE_URL . 'checkout.php?cancel=1',
             ]));
             
             $res = curl_exec($ch);
@@ -145,8 +145,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'amount' => ['currency_code' => 'USD', 'value' => number_format($total_final / 3.75, 2, '.', '')]
                     ]],
                     'application_context' => [
-                        'return_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/pago_exitoso.php?external_reference=' . $numero_pedido,
-                        'cancel_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/checkout.php?cancel=1'
+                        'return_url' => BASE_URL . 'pago_exitoso.php?external_reference=' . $numero_pedido,
+                        'cancel_url' => BASE_URL . 'checkout.php?cancel=1'
                     ]
                 ]);
                 curl_setopt($ch_order, CURLOPT_POSTFIELDS, $order_data);
