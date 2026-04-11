@@ -1,7 +1,4 @@
 <?php
-ob_start();
-session_start();
-
 // Core System Configuration & .env Loader
 require_once __DIR__ . '/env_loader.php';
 require_once __DIR__ . '/middleware.php';
@@ -65,11 +62,6 @@ try {
     $check_pago_online = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name='pedidos' AND column_name='estado_pago_online'")->fetch();
     if (!$check_pago_online) {
         $pdo->exec("ALTER TABLE public.pedidos ADD COLUMN estado_pago_online varchar DEFAULT 'no_pagado' CHECK (estado_pago_online IN ('pagado', 'no_pagado'))");
-    }
-    
-    $check_estado_online = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name='pedidos' AND column_name='estado_pago_online'")->fetch();
-    if (!$check_estado_online) {
-        $pdo->exec("ALTER TABLE public.pedidos ADD COLUMN estado_pago_online varchar DEFAULT 'pendiente'");
     }
 
     $check_config = $pdo->query("SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name='configuraciones'")->fetch();

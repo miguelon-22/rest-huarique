@@ -17,6 +17,8 @@ try {
         $reserva_id = intval(substr($ref, 4));
         db_execute("UPDATE public.reservas_mesa SET estado_pago = 'pagado' WHERE id = ?", [$reserva_id]);
         
+        session_write_close(); // Release session to avoid site blocking during mailer
+
         $res = db_get_one("SELECT * FROM public.reservas_mesa WHERE id = ?", [$reserva_id]);
         if ($res && !empty($res['email'])) {
             $body = get_reservation_email_template($res);
@@ -26,6 +28,8 @@ try {
         $tipo_confirmacion = 'PEDIDO';
         db_execute("UPDATE public.pedidos SET estado_pago_online = 'pagado' WHERE numero_pedido = ?", [$ref]);
         
+        session_write_close(); // Release session to avoid site blocking during mailer
+
         // Fetch order data for email
         $pedido = db_get_one("SELECT p.*, c.email, c.nombre FROM public.pedidos p JOIN public.clientes c ON p.cliente_id = c.id WHERE p.numero_pedido = ?", [$ref]);
         if ($pedido) {
