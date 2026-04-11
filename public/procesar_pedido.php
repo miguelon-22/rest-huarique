@@ -101,8 +101,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
-                'success_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/pago_exitoso.php?external_reference=' . $numero_pedido,
-                'cancel_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/checkout.php?cancel=1',
+                'success_url' => (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . str_replace('procesar_pedido.php', 'pago_exitoso.php', $_SERVER['REQUEST_URI']) . (strpos($_SERVER['REQUEST_URI'], '?') !== false ? '&' : '?') . 'external_reference=' . $numero_pedido,
+                'cancel_url' => (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . str_replace('procesar_pedido.php', 'checkout.php', $_SERVER['REQUEST_URI']) . (strpos($_SERVER['REQUEST_URI'], '?') !== false ? '&' : '?') . 'cancel=1',
             ]));
             
             $res = curl_exec($ch);
@@ -155,8 +155,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'amount' => ['currency_code' => 'USD', 'value' => $monto_usd]
                     ]],
                     'application_context' => [
-                        'return_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/pago_exitoso.php?external_reference=' . $numero_pedido,
-                        'cancel_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/checkout.php?cancel=1'
+                        'return_url' => (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . str_replace('procesar_pedido.php', 'pago_exitoso.php', $_SERVER['REQUEST_URI']) . (strpos($_SERVER['REQUEST_URI'], '?') !== false ? '&' : '?') . 'external_reference=' . $numero_pedido,
+                        'cancel_url' => (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . str_replace('procesar_pedido.php', 'checkout.php', $_SERVER['REQUEST_URI']) . (strpos($_SERVER['REQUEST_URI'], '?') !== false ? '&' : '?') . 'cancel=1'
                     ]
                 ]);
                 curl_setopt($ch_order, CURLOPT_POSTFIELDS, $order_data);
