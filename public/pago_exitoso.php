@@ -1,4 +1,4 @@
-<?php
+ob_start();
 session_start();
 require_once '../config/db.php';
 
@@ -30,7 +30,6 @@ try {
         $pedido = db_get_one("SELECT p.*, c.email, c.nombre FROM public.pedidos p JOIN public.clientes c ON p.cliente_id = c.id WHERE p.numero_pedido = ?", [$ref]);
         if ($pedido) {
             $items = db_get_all("SELECT * FROM public.detalle_pedidos WHERE pedido_id = ?", [$pedido['id']]);
-            // Prepare data for template
             $email_data = [
                 'numero_pedido' => $pedido['numero_pedido'],
                 'nombre' => $pedido['nombre'],
@@ -40,9 +39,10 @@ try {
             @send_huarique_email($pedido['email'], "TU PEDIDO HA SIDO RECIBIDO - {$ref}", $body);
         }
     }
-} catch (Exception $e) {
+} catch (Throwable $e) {
     error_log("SUCCESS_PAGE_ERROR: " . $e->getMessage());
 }
+ob_end_flush();
 ?>
 <!DOCTYPE html>
 <html lang="es">

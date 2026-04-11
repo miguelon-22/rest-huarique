@@ -1,4 +1,7 @@
 <?php
+ob_start();
+session_start();
+
 // Core System Configuration & .env Loader
 require_once __DIR__ . '/env_loader.php';
 require_once __DIR__ . '/middleware.php';
@@ -56,7 +59,17 @@ try {
     if (!$check_estado) {
         $pdo->exec("ALTER TABLE public.reservas_mesa ADD COLUMN estado_pago varchar DEFAULT 'pendiente'");
         $pdo->exec("ALTER TABLE public.reservas_mesa ADD COLUMN payment_id varchar");
-        $pdo->exec("ALTER TABLE public.reservas_mesa ADD COLUMN monto_adelanto numeric DEFAULT 20.00");
+        $pdo->exec("ALTER TABLE public.reservas_mesa ADD COLUMN monto_adelanto numeric DEFAULT 25.00");
+    }
+
+    $check_pago_online = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name='pedidos' AND column_name='estado_pago_online'")->fetch();
+    if (!$check_pago_online) {
+        $pdo->exec("ALTER TABLE public.pedidos ADD COLUMN estado_pago_online varchar DEFAULT 'no_pagado' CHECK (estado_pago_online IN ('pagado', 'no_pagado'))");
+    }
+    
+    $check_estado_online = $pdo->query("SELECT column_name FROM information_schema.columns WHERE table_name='pedidos' AND column_name='estado_pago_online'")->fetch();
+    if (!$check_estado_online) {
+        $pdo->exec("ALTER TABLE public.pedidos ADD COLUMN estado_pago_online varchar DEFAULT 'pendiente'");
     }
 
     $check_config = $pdo->query("SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name='configuraciones'")->fetch();
@@ -86,8 +99,8 @@ try {
         $pdo->exec("ALTER TABLE public.testimonios ADD COLUMN correo varchar");
     }
 
-} catch (PDOException $e) {
-    error_log($e->getMessage());
+} catch (Throwable $e) {
+    error_log("DB_CRITICAL: " . $e->getMessage());
     die("Error de Conexión: " . $e->getMessage());
 }
 
