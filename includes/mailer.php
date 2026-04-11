@@ -18,9 +18,19 @@ function send_huarique_email($to, $subject, $body) {
         $mail->SMTPAuth   = true;
         $mail->Username   = getenv('SMTP_USER');
         $mail->Password   = getenv('SMTP_PASS');
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port       = getenv('SMTP_PORT') ?: 465;
+        $mail->Timeout    = 10; // 10 seconds timeout instead of 300
         $mail->CharSet    = 'UTF-8';
+
+        // Fix for some local environments (Laragon/XAMPP)
+        $mail->SMTPOptions = [
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            ]
+        ];
 
         // Recipients
         $from_email = getenv('SMTP_FROM') ?: $mail->Username;
