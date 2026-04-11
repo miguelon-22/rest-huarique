@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_USERPWD, $stripe_key . ':');
+            $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . dirname($_SERVER['PHP_SELF']) . "/";
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
                 'payment_method_types' => ['card'],
                 'line_items' => [[
@@ -55,8 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'quantity' => 1,
                 ]],
                 'mode' => 'payment',
-                'success_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/pago_exitoso.php?external_reference=' . $numero_reserva,
-                'cancel_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/index.php?reserva=error',
+                'success_url' => $base_url . 'pago_exitoso.php?external_reference=' . $numero_reserva,
+                'cancel_url' => $base_url . 'index.php?reserva=error',
             ]));
             
             $res = curl_exec($ch);

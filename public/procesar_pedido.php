@@ -90,20 +90,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_USERPWD, $stripe_key . ':');
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
-                'payment_method_types' => ['card'],
-                'line_items' => [[
-                    'price_data' => [
-                        'currency' => 'pen',
-                        'product_data' => ['name' => 'Pedido ' . $numero_pedido],
-                        'unit_amount' => intval(round($total_final * 100)),
-                    ],
-                    'quantity' => 1,
-                ]],
-                'mode' => 'payment',
-                'success_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/pago_exitoso.php?external_reference=' . $numero_pedido,
-                'cancel_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/checkout.php?cancel=1',
-            ]));
+                $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . dirname($_SERVER['PHP_SELF']) . "/";
+                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                    'payment_method_types' => ['card'],
+                    'line_items' => [[
+                        'price_data' => [
+                            'currency' => 'pen',
+                            'product_data' => ['name' => 'Pedido ' . $numero_pedido],
+                            'unit_amount' => intval(round($total_final * 100)),
+                        ],
+                        'quantity' => 1,
+                    ]],
+                    'mode' => 'payment',
+                    'success_url' => $base_url . 'pago_exitoso.php?external_reference=' . $numero_pedido,
+                    'cancel_url' => $base_url . 'checkout.php?cancel=1',
+                ]));
             
             $res = curl_exec($ch);
             $curl_error = curl_error($ch);
@@ -148,6 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // PayPal for Sandbox often works better in USD. Convert PEN to USD approximately.
                 $monto_usd = number_format($total_final / 3.75, 2, '.', '');
                 
+                $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . dirname($_SERVER['PHP_SELF']) . "/";
                 $order_data = json_encode([
                     'intent' => 'CAPTURE',
                     'purchase_units' => [[
@@ -155,8 +157,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'amount' => ['currency_code' => 'USD', 'value' => $monto_usd]
                     ]],
                     'application_context' => [
-                        'return_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/pago_exitoso.php?external_reference=' . $numero_pedido,
-                        'cancel_url' => 'http://' . $_SERVER['HTTP_HOST'] . '/rest-huarique/public/checkout.php?cancel=1'
+                        'return_url' => $base_url . 'pago_exitoso.php?external_reference=' . $numero_pedido,
+                        'cancel_url' => $base_url . 'checkout.php?cancel=1'
                     ]
                 ]);
                 curl_setopt($ch_order, CURLOPT_POSTFIELDS, $order_data);
