@@ -17,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        require_once '../libs/mercado_pago_handler.php';
 
         $sql = "INSERT INTO public.reservas_mesa (nombre, dni, email, telefono, fecha, hora, cantidad_personas, informacion_adicional, monto_adelanto, estado_pago) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 25.00, 'pendiente') RETURNING id";
